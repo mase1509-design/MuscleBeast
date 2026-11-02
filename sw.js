@@ -1,5 +1,6 @@
 
-const CACHE_NAME = "muscle-beast-v1";
+const CACHE_NAME = "muscle-beast-v2";
+
 const FILES = [
   "./",
   "./index.html",
@@ -16,30 +17,40 @@ self.addEventListener("install", event => {
 
 self.addEventListener("activate", event => {
   event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(
-        keys.filter(key => key !== CACHE_NAME)
-            .map(key => caches.delete(key))
-      )
-    )
+    (async () => {
+      const keys = await caches.keys();
+
+      await Promise.all(
+        keys
+          .filter(key => key.startsWith("muscle-beast-") && key !== CACHE_NAME)
+          .map(key => caches.delete(key))
+      );
+
+      await self.clients.claim();
+    })()
   );
-  self.clients.claim();
 });
 
 self.addEventListener("fetch", event => {
   if (event.request.method !== "GET") return;
 
-  event.respondWith(
-    caches.match(event.request).then(cached => {
-      if (cached) return cached;
+  const url = new URL(event.request.url);
 
-      return fetch(event.request).then(response => {
-        if (response && response.ok && new URL(event.request.url).origin === self.location.origin) {
+  if (url.origin !== self.location.origin) return;
+
+  event.respondWith(
+    fetch(event.request)
+      .then(response => {
+        if (response && response.ok) {
           const copy = response.clone();
           caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
         }
         return response;
-      }).catch(() => caches.match("./index.html"));
-    })
+      })
+      .catch(() => caches.match(event.request).then(cached => {
+        return cached || (event.request.mode === "navigate"
+          ? caches.match("./index.html")
+          : Response.error());
+      }))
   );
 });
