@@ -427,11 +427,13 @@ async function renderHistory() {
 }
 async function refresh() {
   const [exercises,workouts,sets] = await Promise.all([all("exercises"),all("workouts"),all("sets")]);
-  const records = new Set();
-  for (const s of sets) {
-    const old = records.has(s.exerciseId) ? records.get(s.exerciseId) : null;
-    if (!old || s.weight>old) records.add(s.exerciseId,s.weight);
+const records = new Map();
+for (const s of sets) {
+  const old = records.get(s.exerciseId);
+  if (old === undefined || s.weight > old) {
+    records.set(s.exerciseId, s.weight);
   }
+}
   document.getElementById("statExercises").textContent=exercises.length;
   document.getElementById("statWorkouts").textContent=workouts.length;
   document.getElementById("statSets").textContent=sets.length;
