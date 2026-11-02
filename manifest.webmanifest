@@ -1,0 +1,22 @@
+
+{
+  "id": "./",
+  "name": "Muscle Beast",
+  "short_name": "Muscle Beast",
+  "description": "Dein persönlicher Trainings- und Kraftsport-Tracker.",
+  "lang": "de",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#101114",
+  "theme_color": "#101114",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
