@@ -389,8 +389,8 @@
         <label for="workoutName">Name der Trainingseinheit</label>
         <input id="workoutName" placeholder="z. B. Push Day">
 
-        <label for="workoutDate">Datum und Uhrzeit</label>
-        <input id="workoutDate" type="datetime-local">
+        <label for="workoutDate">Trainingsdatum</label>
+        <input id="workoutDate" type="date">    
       </div>
 
       <div class="panel">
@@ -660,10 +660,14 @@ function localDateKey(value) {
   return `${year}-${month}-${day}`;
 }
 
-function localDateTime() {
+function localDate() {
   const d = new Date();
-  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-  return d.toISOString().slice(0,16);
+
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
 }
 
 /* NAVIGATION */
@@ -911,10 +915,10 @@ async function saveWorkout() {
   }
 
   const date =
-    document.getElementById("workoutDate").value || localDateTime();
+    document.getElementById("workoutDate").value || localDate();
 
   const workoutId = await add("workouts",{
-    date:new Date(date).toISOString(),
+    date:new Date(date + "T12:00:00").toISOString(),
     name:
       document.getElementById("workoutName").value.trim() || "Training"
   });
@@ -945,7 +949,7 @@ async function saveWorkout() {
   workoutDraft=[];
 
   document.getElementById("workoutName").value="";
-  document.getElementById("workoutDate").value=localDateTime();
+  document.getElementById("workoutDate").value=localDate();
 
   renderWorkoutBuilder();
 
