@@ -1358,8 +1358,8 @@ async function init() {
   try {
     db = await openDB();
 
-    document.getElementById("workoutDate").value =
-      localDateTime();
+document.getElementById("workoutDate").value =
+  localDate();
 
     await refresh();
 
