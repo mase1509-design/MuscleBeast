@@ -233,6 +233,20 @@
       color:var(--muted);
     }
 
+    .last-workout-item {
+  padding:10px 0;
+  border-bottom:1px solid var(--line);
+}
+
+.last-workout-item:last-child {
+  border-bottom:0;
+}
+
+.last-workout-name {
+  color:var(--text);
+  font-weight:750;
+}
+    
     .hidden { display:none!important }
 
     .notice {
@@ -382,7 +396,7 @@
 
       <div class="panel">
         <div class="row">
-          <h2>Letztes Training</h2>
+          <h2>Letzte 3 Trainings</h2>
           <span class="eyebrow">VERLAUF</span>
         </div>
         <div id="lastWorkout" class="muted">
@@ -1253,12 +1267,22 @@ async function refresh() {
       maximumFractionDigits:2
     }) + " t";
 
-  const last = [...workouts].sort(
-    (a,b)=>new Date(b.date)-new Date(a.date)
-  )[0];
+const recentWorkouts = [...workouts]
+  .sort((a,b)=>new Date(b.date)-new Date(a.date))
+  .slice(0,3);
 
-  document.getElementById("lastWorkout").textContent = last
-    ? `${last.name} · ${dateText(last.date)}`
+document.getElementById("lastWorkout").innerHTML =
+  recentWorkouts.length
+    ? recentWorkouts.map(workout => `
+        <div class="last-workout-item">
+          <div class="last-workout-name">
+            ${escapeHTML(workout.name || "Training")}
+          </div>
+          <div class="small muted">
+            ${dateText(workout.date)}
+          </div>
+        </div>
+      `).join("")
     : "Noch keine Trainingseinheit gespeichert.";
 
   await renderExercises();
