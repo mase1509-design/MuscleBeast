@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="de">
 <head>
@@ -356,7 +355,7 @@
     <section id="home" class="screen active">
       <div class="eyebrow">DEIN TRAINING</div>
       <h1>Discipline beats motivation. Every fucking time.</h1>
-      
+
 
       <div class="stats">
         <div class="stat">
@@ -372,8 +371,8 @@
           <strong id="statSets">0</strong>
         </div>
         <div class="stat">
-          <div class="eyebrow">Rekorde</div>
-          <strong id="statRecords">0</strong>
+          <div class="eyebrow">Gesamtgewicht</div>
+          <strong id="statTotalWeight">0,00 t</strong>
         </div>
       </div>
 
@@ -1208,16 +1207,6 @@ async function refresh() {
     all("sets")
   ]);
 
-  const records = new Map();
-
-  for (const s of sets) {
-    const old = records.get(s.exerciseId);
-
-    if (old === undefined || s.weight>old) {
-      records.set(s.exerciseId,s.weight);
-    }
-  }
-
   document.getElementById("statExercises").textContent =
     exercises.length;
 
@@ -1227,8 +1216,43 @@ async function refresh() {
   document.getElementById("statSets").textContent =
     sets.length;
 
-  document.getElementById("statRecords").textContent =
-    records.size;
+  /*
+    Gesamtvolumen berechnen:
+    Gewicht × Wiederholungen für alle gespeicherten Sätze.
+    Da die Anzeige in Tonnen erfolgt, werden nur Übungen mit kg-Einheit
+    berücksichtigt. Andere Einheiten werden nicht ungeprüft vermischt.
+  */
+
+  const exerciseMap = new Map(
+    exercises.map(ex=>[ex.id,ex])
+  );
+
+  const totalWeightKg = sets.reduce((sum,set)=>{
+    const exercise = exerciseMap.get(set.exerciseId);
+    const unit = String(exercise?.unit || "kg").trim().toLowerCase();
+
+    if (unit !== "kg") return sum;
+
+    const weight = Number(set.weight);
+    const reps = Number(set.reps);
+
+    if (
+      !Number.isFinite(weight) || weight < 0 ||
+      !Number.isFinite(reps) || reps < 0
+    ) {
+      return sum;
+    }
+
+    return sum + weight * reps;
+  },0);
+
+  const totalWeightTons = totalWeightKg / 1000;
+
+  document.getElementById("statTotalWeight").textContent =
+    totalWeightTons.toLocaleString("de-DE", {
+      minimumFractionDigits:2,
+      maximumFractionDigits:2
+    }) + " t";
 
   const last = [...workouts].sort(
     (a,b)=>new Date(b.date)-new Date(a.date)
@@ -1371,8 +1395,8 @@ async function init() {
   try {
     db = await openDB();
 
-document.getElementById("workoutDate").value =
-  localDate();
+    document.getElementById("workoutDate").value =
+      localDate();
 
     await refresh();
 
