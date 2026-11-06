@@ -641,12 +641,11 @@ function escapeHTML(value) {
   }[c]));
 }
 
-/* Datum mit Uhrzeit – wird z. B. auf der Startseite verwendet */
+/* Datum – wird z. B. auf der Startseite verwendet */
 
 function dateText(value) {
-  return new Date(value).toLocaleString("de-DE", {
-    dateStyle:"medium",
-    timeStyle:"short"
+  return new Date(value).toLocaleDateString("de-DE", {
+    dateStyle:"medium"
   });
 }
 
